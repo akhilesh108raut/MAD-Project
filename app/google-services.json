@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "434104359994",
+    "project_id": "maad-dbe82",
+    "storage_bucket": "maad-dbe82.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:434104359994:android:aa74e0d9011fde5ed26903",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "434104359994-6bnihemhcpl8vcsv0ko8h4li5n0b9i71.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2fto_rXseXaVzvunxgXCwaDsTRxlaSVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "434104359994-6bnihemhcpl8vcsv0ko8h4li5n0b9i71.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
