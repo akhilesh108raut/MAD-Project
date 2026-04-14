@@ -38,13 +38,27 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
+    // Charting
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     
-    // Google Auth
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    // Play Services Tasks (needed for com.google.android.gms.tasks.Task)
+    implementation(libs.play.services.tasks)
+
+    // Room Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    
+    // Gson for JSON serialization in Room Converters
+    implementation("com.google.code.gson:gson:2.11.0")
+
+    // Idling Resource
+    implementation(libs.espresso.idling.resource)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
