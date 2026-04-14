@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "434104359994",
-    "project_id": "maad-dbe82",
-    "storage_bucket": "maad-dbe82.firebasestorage.app"
+    "project_number": "914683612027",
+    "project_id": "maad-1406c",
+    "storage_bucket": "maad-1406c.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:434104359994:android:aa74e0d9011fde5ed26903",
+        "mobilesdk_app_id": "1:914683612027:android:84d5bb683516c11ba88bde",
         "android_client_info": {
           "package_name": "com.example.myapplication"
         }
       },
       "oauth_client": [
         {
-          "client_id": "434104359994-6bnihemhcpl8vcsv0ko8h4li5n0b9i71.apps.googleusercontent.com",
+          "client_id": "914683612027-3b9c7a0p26bofi5mu35t6ibd6niqniqu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapplication",
+            "certificate_hash": "248109bbb8cb8aa67ff12ba42426ed1cb8b1eefc"
+          }
+        },
+        {
+          "client_id": "914683612027-k06b4ro0d1lb4i597fbpp6o0p0rfii3s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB2fto_rXseXaVzvunxgXCwaDsTRxlaSVE"
+          "current_key": "AIzaSyDO9CZiaaredMZtrVZRZGvN86ay2aEXMmE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "434104359994-6bnihemhcpl8vcsv0ko8h4li5n0b9i71.apps.googleusercontent.com",
+              "client_id": "914683612027-k06b4ro0d1lb4i597fbpp6o0p0rfii3s.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

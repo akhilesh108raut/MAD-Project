@@ -1,24 +1,21 @@
 package com.example.myapplication.network;
 
 import com.example.myapplication.models.GameSession;
+import com.example.myapplication.models.PDSession;
 import com.example.myapplication.models.User;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-/**
- * Singleton repository for Firestore operations.
- * Centralizes all data access logic for clean architecture.
- */
 public class FirestoreRepository {
     private static FirestoreRepository instance;
     private final FirebaseFirestore db;
 
-    // Collection Constants
     private static final String COLLECTION_USERS = "users";
-    private static final String COLLECTION_SESSIONS = "game_sessions";
+    private static final String COLLECTION_SESSIONS_REACTION = "reaction_sessions";
+    private static final String COLLECTION_SESSIONS_MEMORY = "memory_sessions";
+    private static final String COLLECTION_PD_SESSIONS = "pd_motor_sessions";
 
     private FirestoreRepository() {
         db = FirebaseFirestore.getInstance();
@@ -31,71 +28,46 @@ public class FirestoreRepository {
         return instance;
     }
 
-    // --- User Operations ---
-
-    /**
-     * Saves or updates a user profile.
-     */
     public Task<Void> saveUser(User user) {
-        return db.collection(COLLECTION_USERS)
-                .document(user.getUserId())
-                .set(user);
+        return db.collection(COLLECTION_USERS).document(user.getUserId()).set(user);
     }
 
-    /**
-     * Fetches a user profile by ID.
-     */
     public Task<DocumentSnapshot> getUserProfile(String userId) {
-        return db.collection(COLLECTION_USERS)
-                .document(userId)
-                .get();
+        return db.collection(COLLECTION_USERS).document(userId).get();
     }
 
-    /**
-     * Checks if a user document exists in Firestore.
-     */
     public Task<DocumentSnapshot> checkUserExists(String userId) {
         return db.collection(COLLECTION_USERS).document(userId).get();
     }
 
-    // --- Game Session Operations ---
-
-    /**
-     * Saves a new game session.
-     */
     public Task<Void> saveGameSession(GameSession session) {
-        // Use an auto-generated ID for each session
-        return db.collection(COLLECTION_SESSIONS)
-                .document()
-                .set(session);
+        String collection = getCollectionForGame(session.getGameName());
+        return db.collection(collection).document().set(session);
     }
 
-    /**
-     * Gets all game sessions for a specific user, ordered by most recent.
-     */
-    public Query getUserGameSessions(String userId) {
-        return db.collection(COLLECTION_SESSIONS)
-                .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING);
+    public Task<Void> savePDSession(PDSession session) {
+        // Use a document ID that includes the userId to help with rules if needed, 
+        // but here we just use auto-id.
+        return db.collection(COLLECTION_PD_SESSIONS).document().set(session);
     }
 
-    /**
-     * Gets sessions for a specific user and game, ordered by score for leaderboards/stats.
-     */
-    public Query getGameHighScores(String userId, String gameName) {
-        return db.collection(COLLECTION_SESSIONS)
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("gameName", gameName)
-                .orderBy("score", Query.Direction.DESCENDING);
+    public Query getUserGameSessions(String userId, String gameName) {
+        String collection = getCollectionForGame(gameName);
+        return db.collection(collection).whereEqualTo("userId", userId);
     }
 
-    /**
-     * Gets global high scores for a specific game (Leaderboard system).
-     */
-    public Query getGlobalLeaderboard(String gameName, int limit) {
-        return db.collection(COLLECTION_SESSIONS)
-                .whereEqualTo("gameName", gameName)
-                .orderBy("score", Query.Direction.DESCENDING)
-                .limit(limit);
+    private String getCollectionForGame(String gameName) {
+        if ("Memory Match".equalsIgnoreCase(gameName)) {
+            return COLLECTION_SESSIONS_MEMORY;
+        } else {
+            return COLLECTION_SESSIONS_REACTION;
+        }
+    }
+    
+    // For debugging: test if we can write to a 'test' collection
+    public Task<Void> testWrite() {
+        java.util.Map<String, Object> test = new java.util.HashMap<>();
+        test.put("test", true);
+        return db.collection("test_connection").document().set(test);
     }
 }

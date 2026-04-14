@@ -1,34 +1,40 @@
 package com.example.myapplication.models;
 
-import com.google.firebase.firestore.IgnoreExtraProperties;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 /**
- * Production-level User model.
+ * Room Entity for User.
  */
-@IgnoreExtraProperties
+@Entity(tableName = "users")
 public class User {
+    @PrimaryKey
+    @NonNull
     private String userId;
     private String name;
     private String username;
     private String email;
     private String phone;
+    private String password; // Added for local auth
     private long createdAt;
 
-    // Required for Firestore serialization
     public User() {}
 
-    public User(String userId, String name, String username, String email, String phone) {
+    public User(@NonNull String userId, String name, String username, String email, String phone, String password) {
         this.userId = userId;
         this.name = name;
         this.username = username;
         this.email = email;
         this.phone = phone;
+        this.password = password;
         this.createdAt = System.currentTimeMillis();
     }
 
     // Getters and Setters
+    @NonNull
     public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public void setUserId(@NonNull String userId) { this.userId = userId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -41,6 +47,9 @@ public class User {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }

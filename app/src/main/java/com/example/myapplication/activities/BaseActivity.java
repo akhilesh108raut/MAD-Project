@@ -1,61 +1,32 @@
 package com.example.myapplication.activities;
 
-import android.app.Dialog;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
-
-import androidx.annotation.Nullable;
+import android.app.ProgressDialog;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.myapplication.R;
-
 public class BaseActivity extends AppCompatActivity {
-
-    private Dialog loadingDialog;
+    private ProgressDialog progressDialog;
 
     protected void showLoading(String message) {
-
-        // Prevent multiple dialogs
-        hideLoading();
-
-        loadingDialog = new Dialog(this);
-        loadingDialog.setContentView(R.layout.dialog_loading);
-        loadingDialog.setCancelable(false);
-
-        TextView tvMessage = loadingDialog.findViewById(R.id.tvLoadingMessage);
-        if (tvMessage != null) {
-            tvMessage.setText(message);
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setIndeterminate(true);
         }
-
-        loadingDialog.show();
+        progressDialog.setMessage(message);
+        progressDialog.show();
     }
 
     protected void hideLoading() {
-        if (loadingDialog != null) {
-            if (loadingDialog.isShowing()) {
-                loadingDialog.dismiss();
-            }
-            loadingDialog = null;
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
         }
     }
 
-    protected void showError(String message) {
-        hideLoading();
-        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show();
-    }
-
     protected void showSuccess(String message) {
-        hideLoading();
-        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onDestroy() {
-        hideLoading();  // Prevent window leak
-        super.onDestroy();
+    protected void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

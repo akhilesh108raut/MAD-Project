@@ -2,47 +2,33 @@ package com.example.myapplication.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.myapplication.R;
-import com.example.myapplication.models.GameSession;
+import com.example.myapplication.database.AppDatabase;
 import com.example.myapplication.models.User;
-import com.example.myapplication.network.FirebaseAuthManager;
-import com.example.myapplication.network.FirestoreRepository;
-import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.myapplication.network.LocalSessionManager;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * Production-level ProfileActivity (Dashboard).
- * Displays real-time stats fetched from Firestore.
- */
 public class ProfileActivity extends BaseActivity {
 
-    private static final String TAG = "ProfileActivity";
-    private TextView tvProfile;
-    private FirebaseAuthManager authManager;
-    private FirestoreRepository repository;
+    private LocalSessionManager sessionManager;
+    private AppDatabase db;
+    private TextView tvWelcome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        tvProfile = findViewById(R.id.tvProfile);
-        authManager = FirebaseAuthManager.getInstance();
-        repository = FirestoreRepository.getInstance();
+        sessionManager = LocalSessionManager.getInstance(this);
+        db = AppDatabase.getInstance(this);
 
-        if (!authManager.isUserLoggedIn()) {
+        if (!sessionManager.isLoggedIn()) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
@@ -53,100 +39,58 @@ public class ProfileActivity extends BaseActivity {
             setSupportActionBar(toolbar);
         }
 
-        loadUserData();
+        tvWelcome = findViewById(R.id.tvWelcome);
+        loadUserProfile();
 
-        MaterialCardView gameQuiz = findViewById(R.id.gameQuiz);
-        if (gameQuiz != null) {
-            gameQuiz.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, GameActivity.class);
-                startActivity(intent);
-            });
-        }
+        findViewById(R.id.btnViewDashboard).setOnClickListener(v -> 
+            startActivity(new Intent(this, DashboardActivity.class)));
 
-        MaterialCardView gamePuzzle = findViewById(R.id.gamePuzzle);
-        if (gamePuzzle != null) {
-            gamePuzzle.setOnClickListener(v -> {
-                showSuccess("Puzzle Game coming soon!");
-            });
-        }
+        // Motor Health Assessments
+        findViewById(R.id.taskSpiral).setOnClickListener(v -> 
+            startPDTask("Spiral", "Trace the spiral from center outward."));
+
+        findViewById(R.id.taskMirror).setOnClickListener(v -> 
+            startPDTask("Mirror", "Trace the star path."));
+
+        findViewById(R.id.taskZigZag).setOnClickListener(v -> 
+            startPDTask("ZigZag", "Trace the zig-zag path."));
+
+        findViewById(R.id.taskOrbit).setOnClickListener(v -> 
+            startPDTask("Orbit", "Follow the moving target accurately."));
+
+        findViewById(R.id.taskGhost).setOnClickListener(v -> 
+            startPDTask("Ghost", "Trace the path before it fades away."));
+
+        findViewById(R.id.taskWriting).setOnClickListener(v -> 
+            startPDTask("Writing", "Copy the sentence provided."));
+
+        // Training Games
+        findViewById(R.id.gameQuiz).setOnClickListener(v -> 
+            startActivity(new Intent(this, GameActivity.class)));
+
+        findViewById(R.id.gamePuzzle).setOnClickListener(v -> 
+            startActivity(new Intent(this, MemoryGameActivity.class)));
     }
 
-    private void loadUserData() {
-        showLoading("Loading Profile...");
-        String uid = authManager.getCurrentUserId();
-
-        repository.getUserProfile(uid).addOnSuccessListener(documentSnapshot -> {
-            User user = documentSnapshot.toObject(User.class);
+    private void loadUserProfile() {
+        String userId = sessionManager.getUserId();
+        new Thread(() -> {
+            User user = db.userDao().getUserById(userId);
             if (user != null) {
-                fetchGameStats(user);
-            } else {
-                hideLoading();
-                showError("User data not found. Please register.");
-                startActivity(new Intent(this, RegisterActivity.class));
-                finish();
-            }
-        }).addOnFailureListener(e -> {
-            hideLoading();
-            showError("Error loading profile: " + e.getMessage());
-        });
-    }
-
-    private void fetchGameStats(User user) {
-        repository.getUserGameSessions(user.getUserId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            int totalGames = queryDocumentSnapshots.size();
-            long totalReactionTime = 0;
-            Map<String, Integer> highScores = new HashMap<>();
-
-            for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                GameSession session = doc.toObject(GameSession.class);
-                if (session != null) {
-                    totalReactionTime += session.getReactionTime();
-                    
-                    String gName = session.getGameName();
-                    int score = session.getScore();
-                    if (gName != null && (!highScores.containsKey(gName) || score > highScores.get(gName))) {
-                        highScores.put(gName, score);
+                runOnUiThread(() -> {
+                    if (tvWelcome != null) {
+                        tvWelcome.setText("Welcome, " + user.getName() + "!");
                     }
-                }
+                });
             }
-
-            double avgReaction = totalGames > 0 ? (double) totalReactionTime / totalGames : 0;
-            updateUI(user, totalGames, avgReaction, highScores);
-            hideLoading();
-
-        }).addOnFailureListener(e -> {
-            hideLoading();
-            showError("Error loading stats: " + e.getMessage());
-            Log.e(TAG, "Stats error", e);
-        });
+        }).start();
     }
 
-    private void updateUI(User user, int totalGames, double avgReaction, Map<String, Integer> highScores) {
-        if (tvProfile == null) return;
-
-        StringBuilder statsBuilder = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
-            statsBuilder.append(entry.getKey())
-                    .append(" High Score: ")
-                    .append(entry.getValue())
-                    .append("\n");
-        }
-
-        StringBuilder welcomeText = new StringBuilder();
-        welcomeText.append("Welcome ").append(user.getName()).append(" (@").append(user.getUsername()).append(")");
-        
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            welcomeText.append("\nEmail: ").append(user.getEmail());
-        }
-        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
-            welcomeText.append("\nPhone: ").append(user.getPhone());
-        }
-
-        welcomeText.append("\n\nTotal Games Played: ").append(totalGames)
-                .append("\n\nHighest Scores:\n").append(statsBuilder.toString())
-                .append("\nAverage Reaction Time: ").append(String.format("%.2f ms", avgReaction));
-        
-        tvProfile.setText(welcomeText.toString());
+    private void startPDTask(String type, String instruction) {
+        Intent intent = new Intent(this, PDTaskActivity.class);
+        intent.putExtra("TASK_TYPE", type);
+        intent.putExtra("INSTRUCTION", instruction);
+        startActivity(intent);
     }
 
     @Override
@@ -158,7 +102,7 @@ public class ProfileActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            authManager.logout();
+            sessionManager.logout();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return true;

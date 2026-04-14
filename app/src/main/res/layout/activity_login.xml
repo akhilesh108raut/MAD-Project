@@ -3,29 +3,44 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
+    android:background="?android:attr/windowBackground"
     android:fillViewport="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
         android:padding="24dp">
 
         <TextView
+            android:id="@+id/tvHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="Welcome Back"
-            android:textColor="@color/primaryColor"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="64dp"
+            android:text="NeuroDraw"
+            android:textAppearance="?attr/textAppearanceDisplayMedium"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSubHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Assessment &amp; Training for Parkinson's care."
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvHeader" />
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/RoundedCard"
+            android:id="@+id/cardLogin"
+            style="?attr/materialCardViewElevatedStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            app:cardCornerRadius="28dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSubHeader">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,10 +49,11 @@
                 android:padding="24dp">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEmail"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email"
+                    android:hint="Email Address"
                     app:startIconDrawable="@android:drawable/ic_dialog_email">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -48,6 +64,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPassword"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -65,59 +82,37 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLogin"
-                    style="@style/GameButton"
+                    style="@style/AppButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:text="Login" />
+                    android:text="Sign In" />
 
-                <TextView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/tvForgot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:padding="8dp"
-                    android:text="Forgot Password?"
-                    android:textColor="@color/primaryColor"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="#DDDDDD" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGoogleSignIn"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Continue with Google"
-                    app:icon="@drawable/ic_google" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPhoneSignIn"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Login with Phone Number" />
+                    android:text="Forgot Password?" />
 
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/tvRegister"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:padding="8dp"
-            android:text="New here? Create Account"
-            android:textColor="@color/primaryColor"
-            android:textStyle="bold" />
+            android:text="New user? Create an account"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardLogin" />
 
-    </LinearLayout>
+        <!-- Hidden but present for logic -->
+        <View android:id="@+id/btnGoogleSignIn" android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+        <View android:id="@+id/btnPhoneSignIn" android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

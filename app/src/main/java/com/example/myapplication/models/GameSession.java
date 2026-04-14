@@ -1,23 +1,22 @@
 package com.example.myapplication.models;
 
-import com.google.firebase.firestore.IgnoreExtraProperties;
-import com.google.firebase.firestore.ServerTimestamp;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import java.util.Date;
 
 /**
- * Production-level GameSession model.
- * Uses @ServerTimestamp for accurate cloud-side timing.
+ * Room Entity for GameSession.
  */
-@IgnoreExtraProperties
+@Entity(tableName = "game_sessions")
 public class GameSession {
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private String userId;
     private String gameName;
     private int score;
     private long reactionTime;
-    @ServerTimestamp
     private Date timestamp;
 
-    // Required for Firestore serialization
     public GameSession() {}
 
     public GameSession(String userId, String gameName, int score, long reactionTime) {
@@ -25,11 +24,13 @@ public class GameSession {
         this.gameName = gameName;
         this.score = score;
         this.reactionTime = reactionTime;
-        // timestamp will be set by the server if not provided, 
-        // but we can set it locally for optimistic UI if needed.
+        this.timestamp = new Date();
     }
 
     // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 

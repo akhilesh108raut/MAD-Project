@@ -1,92 +1,54 @@
 package com.example.myapplication.activities;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.myapplication.R;
-import com.example.myapplication.network.FirebaseAuthManager;
-import com.example.myapplication.network.FirestoreRepository;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+import com.example.myapplication.database.AppDatabase;
+import com.example.myapplication.models.User;
+import com.example.myapplication.network.LocalSessionManager;
 import com.google.android.material.textfield.TextInputEditText;
 
-/**
- * Production-level LoginActivity handling Email, Google, and Phone Authentication.
- */
 public class LoginActivity extends BaseActivity {
 
     private TextInputEditText etEmail, etPassword;
-    private FirebaseAuthManager authManager;
-    private FirestoreRepository repository;
-    private GoogleSignInClient mGoogleSignInClient;
-
-    private final ActivityResultLauncher<Intent> googleSignInLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
-                    try {
-                        GoogleSignInAccount account = task.getResult(ApiException.class);
-                        if (account != null) {
-                            firebaseAuthWithGoogle(account.getIdToken());
-                        }
-                    } catch (ApiException e) {
-                        showError("Google sign in failed: " + e.getMessage());
-                    }
-                }
-            }
-    );
+    private AppDatabase db;
+    private LocalSessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        authManager = FirebaseAuthManager.getInstance();
-        repository = FirestoreRepository.getInstance();
+        db = AppDatabase.getInstance(this);
+        sessionManager = LocalSessionManager.getInstance(this);
 
-        // Redirect based on login AND registration state
-        if (authManager.isUserLoggedIn()) {
-            checkUserExistsAndNavigate();
+        if (sessionManager.isLoggedIn()) {
+            navigateToDashboard();
         }
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         Button btnLogin = findViewById(R.id.btnLogin);
-        TextView tvForgot = findViewById(R.id.tvForgot);
-        TextView tvRegister = findViewById(R.id.tvRegister);
-        Button btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn);
-        Button btnPhoneSignIn = findViewById(R.id.btnPhoneSignIn);
-
-        // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        View tvRegister = findViewById(R.id.tvRegister);
+        
+        // Hide Google/Phone buttons (cleaned up from UI redesign)
+        View btnGoogle = findViewById(R.id.btnGoogleSignIn);
+        if (btnGoogle != null) btnGoogle.setVisibility(View.GONE);
+        
+        View btnPhone = findViewById(R.id.btnPhoneSignIn);
+        if (btnPhone != null) btnPhone.setVisibility(View.GONE);
 
         btnLogin.setOnClickListener(v -> loginUser());
 
-        tvForgot.setOnClickListener(v ->
-                startActivity(new Intent(this, ResetPasswordActivity.class)));
-
-        tvRegister.setOnClickListener(v ->
-                startActivity(new Intent(this, RegisterActivity.class)));
-
-        btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
-
-        btnPhoneSignIn.setOnClickListener(v -> 
-                startActivity(new Intent(this, PhoneLoginActivity.class)));
+        tvRegister.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+        });
     }
 
     private void loginUser() {
@@ -103,57 +65,25 @@ public class LoginActivity extends BaseActivity {
             return;
         }
 
-        showLoading("Logging in...");
+        showLoading("Verifying Credentials...");
 
-        authManager.login(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                checkUserExistsAndNavigate();
-            } else {
+        new Thread(() -> {
+            User user = db.userDao().login(email, password);
+            runOnUiThread(() -> {
                 hideLoading();
-                showError("Login Failed: " + task.getException().getMessage());
-            }
-        });
-    }
-
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        googleSignInLauncher.launch(signInIntent);
-    }
-
-    private void firebaseAuthWithGoogle(String idToken) {
-        showLoading("Authenticating with Google...");
-        authManager.signInWithGoogle(idToken).addOnCompleteListener(this, task -> {
-            if (task.isSuccessful()) {
-                checkUserExistsAndNavigate();
-            } else {
-                hideLoading();
-                showError("Google Authentication Failed");
-            }
-        });
-    }
-
-    private void checkUserExistsAndNavigate() {
-        showLoading("Checking profile...");
-        String uid = authManager.getCurrentUserId();
-        repository.checkUserExists(uid).addOnCompleteListener(task -> {
-            hideLoading();
-            if (task.isSuccessful()) {
-                if (task.getResult().exists()) {
+                if (user != null) {
+                    sessionManager.createLoginSession(user.getUserId());
                     navigateToDashboard();
                 } else {
-                    // Force registration if profile document doesn't exist
-                    startActivity(new Intent(this, RegisterActivity.class));
-                    finish();
+                    showError("Incorrect email or password");
                 }
-            } else {
-                showError("Error checking user profile: " + task.getException().getMessage());
-            }
-        });
+            });
+        }).start();
     }
 
     private void navigateToDashboard() {
         Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
+        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
         finish();
     }
 }

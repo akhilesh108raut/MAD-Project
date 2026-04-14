@@ -87,7 +87,7 @@ public class PhoneLoginActivity extends BaseActivity {
                 checkUserExistsAndNavigate();
             } else {
                 hideLoading();
-                showError("Verification failed: " + task.getException().getMessage());
+                showError("Verification failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
             }
         });
     }

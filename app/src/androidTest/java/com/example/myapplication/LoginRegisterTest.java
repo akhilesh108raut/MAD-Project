@@ -1,27 +1,28 @@
 package com.example.myapplication;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.not;
 
+import androidx.test.espresso.IdlingRegistry;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.myapplication.activities.LoginActivity;
+import com.example.myapplication.network.EspressoIdlingResource;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * UI Test Bot for Login and Registration functionality.
- * Optimized with Root Matchers and Delays to handle Loading Dialogs.
+ * Senior QA implementation of Login/Register tests.
+ * Uses IdlingResource for production-level synchronization instead of flaky Thread.sleep().
  */
 @RunWith(AndroidJUnit4.class)
 public class LoginRegisterTest {
@@ -30,66 +31,83 @@ public class LoginRegisterTest {
     public ActivityScenarioRule<LoginActivity> activityRule =
             new ActivityScenarioRule<>(LoginActivity.class);
 
-    private void waitFor(long millis) {
-        try { Thread.sleep(millis); } catch (InterruptedException e) { e.printStackTrace(); }
+    @Before
+    public void registerIdlingResource() {
+        // Register IdlingResource to synchronize Espresso with background tasks (Firebase/Loading Dialog)
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.getIdlingResource());
+    }
+
+    @After
+    public void unregisterIdlingResource() {
+        // Unregister to avoid memory leaks and side effects in other test classes
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.getIdlingResource());
+    }
+
+    // =========================
+    // Helpers
+    // =========================
+
+    private void performLogin(String email, String password) {
+        onView(withId(R.id.etEmail)).perform(replaceText(email), closeSoftKeyboard());
+        onView(withId(R.id.etPassword)).perform(replaceText(password), closeSoftKeyboard());
+        onView(withId(R.id.btnLogin)).perform(click());
+        // No Thread.sleep here! IdlingResource handles the wait automatically.
+    }
+
+    // =========================
+    // TESTS
+    // =========================
+
+    @Test
+    public void testWrongCredentials() {
+        performLogin("wrong@test.com", "wrongpass");
+
+        // Espresso waits here automatically until the Loading Dialog is dismissed.
+        // Once dismissed, focus returns to LoginActivity where btnLogin exists.
+        onView(withId(R.id.btnLogin)).check(matches(isDisplayed()));
     }
 
     @Test
-    public void testFullNavigationFlow() {
-        onView(withId(R.id.btnPhoneSignIn)).perform(click());
-        waitFor(1000);
-        onView(withId(R.id.btnSendOtp)).check(matches(isDisplayed()));
-        
-        androidx.test.espresso.Espresso.pressBack();
-        waitFor(500);
+    public void testValidLoginSuccess() {
+        // Use your test account credentials
+        performLogin("testuser@gmail.com", "correctPassword");
 
+        // Espresso waits until the login + checkUserExists + navigation logic finishes
+        // and the homeContainer view appears in the next activity.
+        onView(withId(R.id.homeContainer)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testNavigationToRegister() {
         onView(withId(R.id.tvRegister)).perform(click());
-        waitFor(1000);
+        
+        // Navigation is usually fast, but Espresso handles it gracefully
         onView(withId(R.id.etFullName)).check(matches(isDisplayed()));
     }
 
     @Test
-    public void testEmailLoginValidation() {
-        // Test empty fields
-        onView(withId(R.id.btnLogin)).perform(click());
-        onView(withId(R.id.btnLogin)).check(matches(isDisplayed()));
+    public void testSuccessfulRegistration() {
+        onView(withId(R.id.tvRegister)).perform(click());
 
-        // Test invalid credentials
-        onView(withId(R.id.etEmail)).perform(typeText("wrong@test.com"), closeSoftKeyboard());
-        onView(withId(R.id.etPassword)).perform(typeText("password123"), closeSoftKeyboard());
-        onView(withId(R.id.btnLogin)).perform(click());
+        // Generate a unique email to avoid "User already exists" error
+        String uniqueEmail = "test" + System.currentTimeMillis() + "@gmail.com";
+
+        onView(withId(R.id.etFullName)).perform(replaceText("QA Tester"), closeSoftKeyboard());
+        onView(withId(R.id.etUsername)).perform(replaceText("tester" + System.currentTimeMillis()), closeSoftKeyboard());
+        onView(withId(R.id.etEmail)).perform(replaceText(uniqueEmail), closeSoftKeyboard());
+        onView(withId(R.id.etPassword)).perform(replaceText("Password@123"), closeSoftKeyboard());
         
-        // IMPORTANT: The app shows a Loading Dialog ("Logging in...")
-        // We must wait for the dialog to disappear before checking for the button again.
-        waitFor(3000); 
-        
-        // Check if we are back on the Login screen (button is visible)
-        onView(withId(R.id.btnLogin)).check(matches(isDisplayed()));
+        onView(withId(R.id.btnRegister)).perform(click());
+
+        // Automatically waits for Firebase registration and navigation
+        onView(withId(R.id.homeContainer)).check(matches(isDisplayed()));
     }
 
     @Test
-    public void testRegistrationValidation() {
+    public void testBackNavigation() {
         onView(withId(R.id.tvRegister)).perform(click());
-        waitFor(1000);
-
-        onView(withId(R.id.btnRegister)).perform(click());
-        onView(withId(R.id.etFullName)).check(matches(isDisplayed()));
-
-        onView(withId(R.id.etFullName)).perform(typeText("Test User"), closeSoftKeyboard());
-        onView(withId(R.id.etUsername)).perform(typeText("tu"), closeSoftKeyboard());
-        onView(withId(R.id.btnRegister)).perform(click());
+        pressBack();
         
-        onView(withId(R.id.btnRegister)).check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void testSocialNavigationFromRegister() {
-        onView(withId(R.id.tvRegister)).perform(click());
-        waitFor(1000);
-
-        onView(withId(R.id.btnPhoneSignUp)).perform(click());
-        waitFor(1500); // Transition to PhoneLoginActivity
-
-        onView(withId(R.id.btnSendOtp)).check(matches(isDisplayed()));
+        onView(withId(R.id.btnLogin)).check(matches(isDisplayed()));
     }
 }

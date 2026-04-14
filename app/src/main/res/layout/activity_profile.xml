@@ -1,150 +1,259 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
-    android:orientation="vertical">
+    android:background="?android:attr/windowBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:elevation="0dp">
+        android:background="?android:attr/windowBackground"
+        app:liftOnScroll="true">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primaryColor"
-            app:title="Dashboard"
-            app:titleTextColor="@android:color/white" />
+            app:title="NeuroDraw"
+            app:titleCentered="true"
+            app:titleTextAppearance="?attr/textAppearanceHeadlineSmall" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:padding="16dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <!-- Stats Card -->
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome back"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textColor="?attr/colorOnSurface" />
+
             <com.google.android.material.card.MaterialCardView
-                style="@style/RoundedCard"
+                android:id="@+id/btnViewDashboard"
+                style="?attr/materialCardViewFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/primaryColor">
+                android:layout_marginTop="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tvProfile"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp"
-                        android:lineSpacingExtra="4dp"/>
+                    <ImageView
+                        android:id="@+id/ivStats"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@android:drawable/ic_menu_sort_by_size"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/colorOnPrimaryContainer" />
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvStatsTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="View Health Insights"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        app:layout_constraintBottom_toBottomOf="@id/ivStats"
+                        app:layout_constraintStart_toEndOf="@id/ivStats"
+                        app:layout_constraintTop_toTopOf="@id/ivStats" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:layout_marginBottom="16dp"
-                android:text="Choose a Game"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:text="Motor Assessments"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alignmentMode="alignMargins"
-                android:columnCount="2"
-                android:rowCount="1">
+                android:orientation="vertical">
 
-                <!-- Game 1 -->
+                <!-- Spiral -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskSpiral"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_menu_edit" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Spiral Test" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trace from center" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Mirror -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskMirror"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_menu_revert" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mirror Star" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reverse coordination" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- ZigZag -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskZigZag"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_menu_directions" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ZigZag Path" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Precision tracking" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Orbit -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskOrbit"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_menu_compass" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Orbit Tracer" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Follow moving target" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Ghost -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskGhost"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_menu_view" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ghost Path" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Memory based tracing" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Writing -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/taskWriting"
+                    style="?attr/materialCardViewElevatedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:padding="16dp">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:layout_width="56dp" android:layout_height="56dp" android:background="?attr/colorSecondaryContainer" android:padding="12dp" android:src="@android:drawable/ic_input_add" app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" app:tint="?attr/colorOnSecondaryContainer" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Scribe Test" android:textAppearance="?attr/textAppearanceTitleMedium" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Handwriting analysis" android:textAppearance="?attr/textAppearanceBodySmall" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:text="Cognitive Training"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/gameQuiz"
-                    style="@style/RoundedCard"
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <ImageView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
-                            android:src="@drawable/ic_quiz"
-                            app:tint="@color/accentBlue" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="Reaction"
-                            android:textColor="@color/black"
-                            android:textStyle="bold" />
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="16dp">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_help" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Reaction" android:textAppearance="?attr/textAppearanceLabelLarge" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Game 2 -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/gamePuzzle"
-                    style="@style/RoundedCard"
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <ImageView
-                            android:layout_width="60dp"
-                            android:layout_height="60dp"
-                            android:src="@drawable/ic_puzzle"
-                            app:tint="@color/accentOrange" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="Puzzle"
-                            android:textColor="@color/black"
-                            android:textStyle="bold" />
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="16dp">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_gallery" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Memory" android:textAppearance="?attr/textAppearanceLabelLarge" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-            </GridLayout>
+            </LinearLayout>
+
+            <Space android:layout_width="match_parent" android:layout_height="40dp" />
 
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

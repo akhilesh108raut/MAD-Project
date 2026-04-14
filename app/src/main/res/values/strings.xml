@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">My Application</string>
-    <!-- Add your Web Client ID from Firebase Console > Settings > General > Web SDK configuration -->
-    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID_HERE</string>
+    <string name="default_web_client_id">914683612027-k06b4ro0d1lb4i597fbpp6o0p0rfii3s.apps.googleusercontent.com</string>
 </resources>

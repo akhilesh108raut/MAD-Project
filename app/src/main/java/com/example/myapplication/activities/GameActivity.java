@@ -3,49 +3,62 @@ package com.example.myapplication.activities;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.widget.Toolbar;
 
 import com.example.myapplication.R;
+import com.example.myapplication.database.AppDatabase;
 import com.example.myapplication.models.GameSession;
-import com.example.myapplication.network.FirebaseAuthManager;
-import com.example.myapplication.network.FirestoreRepository;
+import com.example.myapplication.network.LocalSessionManager;
 
 import java.util.Random;
 
-/**
- * Production-level GameActivity.
- * Replaces SQLite with Firestore for saving game sessions.
- */
 public class GameActivity extends BaseActivity {
 
     private long startTime;
     private boolean gameStarted = false;
-    private FirebaseAuthManager authManager;
-    private FirestoreRepository repository;
+    private LocalSessionManager sessionManager;
+    private AppDatabase db;
+    private View screen;
+    private TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        authManager = FirebaseAuthManager.getInstance();
-        repository = FirestoreRepository.getInstance();
+        sessionManager = LocalSessionManager.getInstance(this);
+        db = AppDatabase.getInstance(this);
 
-        View screen = findViewById(R.id.gameLayout);
-        TextView text = findViewById(R.id.tvMessage);
-        ImageButton btnBack = findViewById(R.id.btnBack);
+        screen = findViewById(R.id.gameLayout);
+        text = findViewById(R.id.tvMessage);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
+            }
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
 
+        startNewRound();
+    }
+
+    private void startNewRound() {
+        gameStarted = false;
+        screen.setBackgroundColor(Color.BLACK);
+        text.setTextColor(Color.WHITE);
         text.setText("Wait for White...");
 
         int delay = new Random().nextInt(3000) + 2000;
 
-        new Handler().postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isFinishing()) {
                 screen.setBackgroundColor(Color.WHITE);
                 text.setTextColor(Color.BLACK);
@@ -60,31 +73,28 @@ public class GameActivity extends BaseActivity {
                 long reactionTime = System.currentTimeMillis() - startTime;
                 text.setText("Reaction Time: " + reactionTime + " ms");
                 
-                // Example score logic: higher score for faster reaction
                 int score = (int) Math.max(0, 1000 - reactionTime);
-                
-                saveSessionToCloud("Reaction Test", score, reactionTime);
+                saveSessionLocally("Reaction Test", score, reactionTime);
                 gameStarted = false;
             }
         });
     }
 
-    private void saveSessionToCloud(String gameName, int score, long reactionTime) {
-        String uid = authManager.getCurrentUserId();
+    private void saveSessionLocally(String gameName, int score, long reactionTime) {
+        String uid = sessionManager.getUserId();
         if (uid == null) return;
 
         showLoading("Saving your score...");
 
-        GameSession session = new GameSession(uid, gameName, score, reactionTime);
-
-        repository.saveGameSession(session).addOnCompleteListener(task -> {
-            hideLoading();
-            if (task.isSuccessful()) {
-                showSuccess("Score saved to cloud!");
-                // Optionally finish or restart
-            } else {
-                showError("Failed to save score: " + task.getException().getMessage());
-            }
-        });
+        new Thread(() -> {
+            GameSession session = new GameSession(uid, gameName, score, reactionTime);
+            db.gameSessionDao().insertSession(session);
+            
+            runOnUiThread(() -> {
+                hideLoading();
+                Toast.makeText(this, "Score saved locally!", Toast.LENGTH_SHORT).show();
+                new Handler(Looper.getMainLooper()).postDelayed(this::startNewRound, 2000);
+            });
+        }).start();
     }
 }
